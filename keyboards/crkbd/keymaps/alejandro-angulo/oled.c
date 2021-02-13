@@ -9,7 +9,7 @@
 #define L_RAISE 4
 #define L_ADJUST 8
 
-uint16_t blink_timeout;
+uint32_t blink_timeout;
 
 oled_rotation_t oled_init_user(oled_rotation_t rotation) {
     return OLED_ROTATION_270;
@@ -31,13 +31,19 @@ void render_bootmagic_status(bool status) {
 }
 
 void render_prompt(void) {
-    uint16_t time = timer_read();
+    uint32_t time = timer_read32();
     bool blink = (time % 2000) < 500;
 
 #if BLINK_TIMEOUT > 0
     // Stop blinking to allow the oled to turn off
-    if (timer_expired(timer_read(), blink_timeout)) {
+    if (timer_expired32(time, blink_timeout)) {
         blink = false;
+    }
+#endif
+
+#ifdef CONSOLE_ENABLE
+    if (blink) {
+        uprintf("%u %u: %d\n", time, blink_timeout, blink);
     }
 #endif
 
@@ -178,7 +184,10 @@ void oled_task_user(void) {
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 #if BLINK_TIMEOUT > 0
     if (record->event.pressed) {
-      blink_timeout = timer_read() + BLINK_TIMEOUT;
+#ifdef CONSOLE_ENABLE
+        uprintf("KL: kc: 0x%04X, col: %u, row: %u, pressed: %b, time: %u, interrupt: %b, count: %u\n", keycode, record->event.key.col, record->event.key.row, record->event.pressed, record->event.time, record->tap.interrupted, record->tap.count);
+#endif
+        blink_timeout = timer_read32() + BLINK_TIMEOUT;
     }
 #endif
 
