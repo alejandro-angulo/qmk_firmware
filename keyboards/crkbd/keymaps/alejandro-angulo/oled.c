@@ -1,50 +1,18 @@
-oled_rotation_t oled_init_user(oled_rotation_t rotation) {
-  /*
-  if (!is_master) {
-    return OLED_ROTATION_180;  // flips the display 180 degrees if offhand
-  }
-  return rotation;
-  */
-    return OLED_ROTATION_270;
-}
+#include "oled_driver.h"
+
+#ifndef BLINK_TIMEOUT
+#   define BLINK_TIMEOUT 3000
+#endif
 
 #define L_BASE 0
 #define L_LOWER 2
 #define L_RAISE 4
 #define L_ADJUST 8
 
-void oled_render_layer_state(void) {
-    oled_write_P(PSTR("Layer: "), false);
-    switch (layer_state) {
-        case L_BASE:
-            oled_write_ln_P(PSTR("Default"), false);
-            break;
-        case L_LOWER:
-            oled_write_ln_P(PSTR("Lower"), false);
-            break;
-        case L_RAISE:
-            oled_write_ln_P(PSTR("Raise"), false);
-            break;
-        case L_ADJUST:
-        case L_ADJUST|L_LOWER:
-        case L_ADJUST|L_RAISE:
-        case L_ADJUST|L_LOWER|L_RAISE:
-            oled_write_ln_P(PSTR("Adjust"), false);
-            break;
-    }
-}
+uint16_t blink_timeout;
 
-
-char keylog_str[24] = {};
-
-void set_keylog(uint16_t keycode, keyrecord_t *record) {
-  // update keylog
-  snprintf(keylog_str, sizeof(keylog_str), "%dx%d",
-           record->event.key.row, record->event.key.col);
-}
-
-void oled_render_keylog(void) {
-    oled_write(keylog_str, false);
+oled_rotation_t oled_init_user(oled_rotation_t rotation) {
+    return OLED_ROTATION_270;
 }
 
 void render_bootmagic_status(bool status) {
@@ -63,7 +31,15 @@ void render_bootmagic_status(bool status) {
 }
 
 void render_prompt(void) {
-    bool blink = (timer_read() % 1000) < 500;
+    uint16_t time = timer_read();
+    bool blink = (time % 2000) < 500;
+
+#if BLINK_TIMEOUT > 0
+    // Stop blinking to allow the oled to turn off
+    if (timer_expired(timer_read(), blink_timeout)) {
+        blink = false;
+    }
+#endif
 
     switch (layer_state) {
         case L_LOWER:
@@ -200,8 +176,11 @@ void oled_task_user(void) {
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-  if (record->event.pressed) {
-    set_keylog(keycode, record);
-  }
-  return true;
+#if BLINK_TIMEOUT > 0
+    if (record->event.pressed) {
+      blink_timeout = timer_read() + BLINK_TIMEOUT;
+    }
+#endif
+
+    return true;
 }
