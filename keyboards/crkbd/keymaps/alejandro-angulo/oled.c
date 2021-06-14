@@ -144,7 +144,7 @@ void render_mod_status(void) {
 }
 
 void oled_task_user(void) {
-    if (is_master) {
+    if (is_keyboard_master()) {
         oled_write_ln("", false);
         oled_write_ln("", false);
 
