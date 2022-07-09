@@ -34,15 +34,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define TAPPING_TERM 100
 
 #ifdef RGBLIGHT_ENABLE
-    #undef RGBLED_NUM
-    #define RGBLIGHT_ANIMATIONS
-    #define RGBLED_NUM 27
-    #define RGBLIGHT_LIMIT_VAL 120
-    #define RGBLIGHT_HUE_STEP 10
-    #define RGBLIGHT_SAT_STEP 17
-    #define RGBLIGHT_VAL_STEP 17
+#    undef RGBLED_NUM
+#    define RGBLIGHT_ANIMATIONS
+#    define RGBLED_NUM 27
+#    define RGBLIGHT_LIMIT_VAL 120
+#    define RGBLIGHT_HUE_STEP 10
+#    define RGBLIGHT_SAT_STEP 17
+#    define RGBLIGHT_VAL_STEP 17
 #endif
 
 #define OLED_FONT_H "keyboards/crkbd/keymaps/alejandro-angulo/glcdfont.c"
 #define OLED_TIMEOUT 10000
+#define SPLIT_LAYER_STATE_ENABLE
+#define SPLIT_LED_STATE_ENABLE
+#define SPLIT_MODS_ENABLE
+#define SPLIT_OLED_ENABLE
+#define SPLIT_WPM_ENABLE
 // #define BLINK_TIMEOUT 3000
+
+// Space optimizaiton, enables link time optimization
+// See: https://github.com/qmk/qmk_firmware/issues/3224
+#define NO_ACTION_MACRO
+#define NO_ACTION_FUNCTION
