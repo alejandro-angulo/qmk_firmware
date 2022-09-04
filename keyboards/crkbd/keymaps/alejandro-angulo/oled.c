@@ -89,21 +89,11 @@ static void render_anim(void) {
         }
     }
 
-    if (timer_elapsed(last_keypress_time) < ANIM_STOPS_AFTER_MS) {
-        // Typing has stopped. Manually update wpm to prevent lag in animation
-        // stopping.
-        // set_current_wpm(is_oled_on() ? TAP_SPEED : 0);
-        set_current_wpm(TAP_SPEED);
-    }
-
     uint8_t current_wpm = get_current_wpm();
     anim_frame_duration = multiplier * pow(base, current_wpm);
 
-#ifdef CONSOLE_ENABLE
-    /*uprintf("WPM: %d\nAnimation speed: %u\n", current_wpm, anim_frame_duration);*/
-#endif
-
-    if (current_wpm != 000) {
+    if (current_wpm != 0) {
+        uprintf("Current wpm %d %u\n", current_wpm, current_wpm);
         oled_on(); // not essential but turns on animation OLED with any alpha keypress
         if (timer_elapsed32(anim_timer) > anim_frame_duration) {
             anim_timer = timer_read32();
